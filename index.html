@@ -1,76 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Cookie Clicker</title>
-  <style>
-    body {
-      text-align: center;
-      font-family: sans-serif;
-      margin-top: 50px;
-      background-color: #f9e3b4;
-    }
-    #cookie {
-      width: 200px;
-      height: 200px;
-      cursor: pointer;
-      border-radius: 50%;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    #cookie:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
-    }
-    #score {
-      font-size: 24px;
-      margin-top: 20px;
-    }
-    #upgrade, #autoClicker {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 18px;
-      cursor: pointer;
-      border-radius: 5px;
-      border: none;
-      background-color: #ffa500;
-      transition: background-color 0.3s;
-    }
-    #upgrade:hover, #autoClicker:hover {
-      background-color: #ff8c00;
-    }
-    #autoStatus {
-      font-size: 20px;
-      margin-top: 10px;
-    }
-    /* Auto-Clicker Animation */
-    #autoClickerAnimation {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: none;
-      font-size: 30px;
-      color: #ff4500;
-      animation: clickAnimation 1s infinite;
-    }
-    @keyframes clickAnimation {
-      0% { transform: translate(-50%, -50%) scale(1); }
-      50% { transform: translate(-50%, -50%) scale(1.2); }
-      100% { transform: translate(-50%, -50%) scale(1); }
-    }
-  </style>
-</head>
-<body>
-  <h1>Cookie Clicker</h1>
-  <img id="cookie" src="cookie.jpg" alt="Cookie">
-  <div id="score">Cookies: 0</div>
-  <button id="upgrade">Upgrade Click (Cost: 10 cookies)</button>
-  <button id="autoClicker">Buy Auto-Clicker (Cost: 50 cookies)</button>
-  <div id="autoStatus">Auto-Clickers: 0</div>
+// Load saved game state from localStorage
+let cookies = parseInt(localStorage.getItem("cookies")) || 0;
+let upgradeCost = parseInt(localStorage.getItem("upgradeCost")) || 10;
+let autoClickerCost = parseInt(localStorage.getItem("autoClickerCost")) || 50;
+let autoClickers = parseInt(localStorage.getItem("autoClickers")) || 0;
+let autoClickerInterval = null;
 
-  <!-- Auto-Clicker Animation -->
-  <div id="autoClickerAnimation">💻</div>
+const cookie = document.getElementById("cookie");
+const score = document.getElementById("score");
+const upgradeButton = document.getElementById("upgrade");
+const autoClickerButton = document.getElementById("autoClicker");
+const autoStatus = document.getElementById("autoStatus");
+const autoClickerAnimation = document.getElementById("autoClickerAnimation");
+autoClickerCost = 10
+upgradeCost = 10
 
-  <script src="script.js"></script>
-</body>
-</html>
+
+// Function to update the score and save progress
+function updateScore() {
+  score.textContent = `Cookies: ${cookies}`;
+  localStorage.setItem("cookies", cookies); // Save cookies to localStorage
+  localStorage.setItem("upgradeCost", upgradeCost); // Save upgrade cost
+  localStorage.setItem("autoClickerCost", autoClickerCost); // Save auto-clicker cost
+  localStorage.setItem("autoClickers", autoClickers); // Save number of auto-clickers
+}
+
+// Update the displayed cookies on load
+updateScore();
+
+cookie.addEventListener("click", () => {
+  cookies++;
+  updateScore(); // Update and save after each click
+});
+
+upgradeButton.addEventListener("click", () => {
+  if (cookies >= upgradeCost) {
+    cookies -= upgradeCost;
+    upgradeCost = Math.round(upgradeCost * 1.5); // Increase cost for the next upgrade
+    updateScore(); // Update and save after the upgrade
+    upgradeButton.textContent = `Upgrade Click (Cost: ${upgradeCost} cookies)`; // Update button text
+  } else {
+    alert("Not enough cookies for upgrade!");
+    
+  }
+});
+
+autoClickerButton.addEventListener("click", () => {
+  if (cookies >= autoClickerCost) {
+    cookies -= autoClickerCost;
+    autoClickerCost = Math.round(autoClickerCost * 2); // Increase cost for the next auto-clicker
+    autoClickers++;
+    updateScore(); // Update and save after purchasing an auto-clicker
+    autoStatus.textContent = `Auto-Clickers: ${autoClickers}`;
+    autoClickerButton.textContent = `Buy Auto-Clicker (Cost: ${autoClickerCost} cookies)`; // Update button text
+
+    // Show the auto-clicker animation and start auto-clicking
+    autoClickerAnimation.style.display = "block";
+    if (!autoClickerInterval) {
+      autoClickerInterval = setInterval(() => {
+        cookies++;
+        updateScore(); // Update and save after each auto-clicker click
+      }, 1000);
+    }
+  } else {
+    alert("Not enough cookies for auto-clicker!");
+    
+  }
+});
